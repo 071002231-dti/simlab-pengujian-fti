@@ -11,6 +11,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             LabSeeder::class,
             UserSeeder::class,
+            TestTypeSeeder::class,
+            TujuanPengujianSeeder::class,
+            ProcedureTemplateSeeder::class,
             TestRequestSeeder::class,
         ]);
     }

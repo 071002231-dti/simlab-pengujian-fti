@@ -30,4 +30,14 @@ class Lab extends Model
     {
         return $this->hasMany(TestRequest::class);
     }
+
+    public function testTypes()
+    {
+        return $this->hasMany(TestType::class);
+    }
+
+    public function activeTestTypes()
+    {
+        return $this->hasMany(TestType::class)->where('is_active', true);
+    }
 }

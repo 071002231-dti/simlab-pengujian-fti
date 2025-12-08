@@ -25,11 +25,40 @@ class TestRequest extends Model
         'sample_name',
         'description',
         'expiry_date',
+        // Bagian A - Pendaftaran
+        'company_name',
+        'phone_whatsapp',
+        'address',
+        // Bagian B - Keperluan
+        'test_type_id',
+        'tujuan_pengujian',
+        // Bagian C - Data Sampel
+        'sample_quantity',
+        'sample_packaging',
+        'estimated_delivery_date',
+        'priority',
+        'special_notes',
+        // Bagian D - Logistik
+        'delivery_method',
+        'special_handling',
+        'sample_return',
+        // Bagian E - Pernyataan
+        'data_accuracy_confirmed',
+        'tat_cost_understood',
+        'declaration_timestamp',
+        // Procedure
+        'procedure_template_id',
     ];
 
     protected $casts = [
         'date_submitted' => 'date:Y-m-d',
         'expiry_date' => 'date:Y-m-d',
+        'estimated_delivery_date' => 'date:Y-m-d',
+        'tujuan_pengujian' => 'array',
+        'special_handling' => 'array',
+        'data_accuracy_confirmed' => 'boolean',
+        'tat_cost_understood' => 'boolean',
+        'declaration_timestamp' => 'datetime',
     ];
 
     // Status Constants
@@ -60,6 +89,21 @@ class TestRequest extends Model
     public function lab()
     {
         return $this->belongsTo(Lab::class);
+    }
+
+    public function testType()
+    {
+        return $this->belongsTo(TestType::class);
+    }
+
+    public function procedureTemplate()
+    {
+        return $this->belongsTo(ProcedureTemplate::class);
+    }
+
+    public function requestProcedure()
+    {
+        return $this->hasOne(RequestProcedure::class, 'test_request_id', 'id');
     }
 
     public static function generateId(): string
