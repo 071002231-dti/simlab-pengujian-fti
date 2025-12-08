@@ -1,0 +1,30 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+.fleet/
+
+# Frontend
+lab-pengujian-react/node_modules/
+lab-pengujian-react/dist/
+
+# Backend
+lab-pengujian-laravel/vendor/
+lab-pengujian-laravel/node_modules/
+lab-pengujian-laravel/storage/*.key
+lab-pengujian-laravel/.phpunit.result.cache
+
+# Old projects (exclude from mono-repo)
+lab-pengujian/
+lab-pengujian-fti/

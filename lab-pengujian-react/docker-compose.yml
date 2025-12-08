@@ -1,0 +1,66 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simlab-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - API_BASE_URL=http://backend:8000/api
+      - USE_MOCK_DATA=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - simlab-network
+    # Uncomment when Laravel backend is ready
+    # depends_on:
+    #   - backend
+
+  # Laravel Backend (uncomment and configure when ready)
+  # backend:
+  #   build:
+  #     context: ../lab-pengujian-laravel
+  #     dockerfile: Dockerfile
+  #   container_name: simlab-backend
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - APP_ENV=production
+  #     - APP_DEBUG=false
+  #     - DB_CONNECTION=mysql
+  #     - DB_HOST=db
+  #     - DB_PORT=3306
+  #     - DB_DATABASE=simlab
+  #     - DB_USERNAME=simlab
+  #     - DB_PASSWORD=secret
+  #   networks:
+  #     - simlab-network
+  #   depends_on:
+  #     - db
+
+  # MySQL Database (uncomment when needed)
+  # db:
+  #   image: mysql:8.0
+  #   container_name: simlab-db
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=rootsecret
+  #     - MYSQL_DATABASE=simlab
+  #     - MYSQL_USER=simlab
+  #     - MYSQL_PASSWORD=secret
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   networks:
+  #     - simlab-network
+
+networks:
+  simlab-network:
+    driver: bridge
+
+# volumes:
+#   mysql_data:

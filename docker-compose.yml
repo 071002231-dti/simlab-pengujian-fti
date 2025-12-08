@@ -1,0 +1,71 @@
+services:
+  frontend:
+    build:
+      context: ./lab-pengujian-react
+      dockerfile: Dockerfile
+    container_name: simlab-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - API_BASE_URL=/api
+      - USE_MOCK_DATA=false
+    depends_on:
+      - backend
+    networks:
+      - simlab-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./lab-pengujian-laravel
+      dockerfile: Dockerfile
+    container_name: simlab-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=SimLab
+      - APP_ENV=production
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=false
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=simlab
+      - DB_USERNAME=simlab
+      - DB_PASSWORD=${DB_PASSWORD:-simlab123}
+      - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - simlab-network
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: simlab-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=simlab
+      - MYSQL_USER=simlab
+      - MYSQL_PASSWORD=${DB_PASSWORD:-simlab123}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - simlab-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  simlab-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
