@@ -5,6 +5,8 @@ import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './pages/Dashboard';
 import { NewRequest } from './pages/NewRequest';
 import { RequestList } from './pages/RequestList';
+import { RequestDetail } from './pages/RequestDetail';
+import { ProcedureTemplates } from './pages/admin/ProcedureTemplates';
 import { Login } from './pages/Login';
 import { UserRole, User } from './types';
 import { Bell, Check, Info, AlertTriangle, Menu } from 'lucide-react';
@@ -258,6 +260,8 @@ const App: React.FC = () => {
             <Route path="/dashboard" element={<Dashboard user={user} />} />
             <Route path="/request/new" element={<NewRequest user={user} />} />
             <Route path="/requests" element={<RequestList user={user} />} />
+            <Route path="/requests/:id" element={<RequestDetail user={user} />} />
+            <Route path="/admin/procedure-templates" element={<ProcedureTemplates user={user} />} />
             <Route path="/settings" element={<div className="text-slate-500">Halaman Pengaturan (Coming Soon)</div>} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

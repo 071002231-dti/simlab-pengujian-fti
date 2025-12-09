@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, List, Settings, LogOut, FlaskConical, X } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, List, Settings, LogOut, FlaskConical, X, ClipboardList } from 'lucide-react';
 import { UserRole } from '../types';
 
 interface SidebarProps {
@@ -74,13 +74,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ userRole, onLogout, isOpen, on
           </Link>
         </div>
 
-        {userRole === UserRole.ADMIN && (
+        {(userRole === UserRole.ADMIN || userRole === UserRole.LABORAN) && (
           <div>
-             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Admin</p>
-            <Link to="/settings" onClick={handleLinkClick} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive('/settings')}`}>
-              <Settings size={18} />
-              Pengaturan Lab
+             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Manajemen</p>
+            <Link to="/admin/procedure-templates" onClick={handleLinkClick} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive('/admin/procedure-templates')}`}>
+              <ClipboardList size={18} />
+              Template Prosedur
             </Link>
+            {userRole === UserRole.ADMIN && (
+              <Link to="/settings" onClick={handleLinkClick} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive('/settings')}`}>
+                <Settings size={18} />
+                Pengaturan Lab
+              </Link>
+            )}
           </div>
         )}
       </nav>

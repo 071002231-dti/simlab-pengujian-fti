@@ -1,16 +1,18 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LABS } from '../constants';
 import { DataService, AuthService } from '../services/database';
 import { StatusBadge } from '../components/StatusBadge';
 import { RequestStatus, User, UserRole, TestRequest } from '../types';
-import { Search, Filter, Download, FileSpreadsheet, FileText, ChevronDown, X, Eye, Calendar, FlaskConical, Loader2, CheckCircle, Play, Send, PackageCheck, ShieldCheck, Lock } from 'lucide-react';
+import { Search, Filter, Download, FileSpreadsheet, FileText, ChevronDown, X, Eye, Calendar, FlaskConical, Loader2, CheckCircle, Play, Send, PackageCheck, ShieldCheck, Lock, ExternalLink } from 'lucide-react';
 
 interface RequestListProps {
   user: User;
 }
 
 export const RequestList: React.FC<RequestListProps> = ({ user }) => {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<TestRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -517,13 +519,23 @@ export const RequestList: React.FC<RequestListProps> = ({ user }) => {
 
             <div className="p-4 border-t border-gray-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4">
               {/* Action Buttons Kiri (Untuk User Internal) */}
-              <div className="w-full sm:w-auto">
+              <div className="w-full sm:w-auto flex gap-2">
                  {renderActionButtons()}
+                 <button
+                   onClick={() => {
+                     setSelectedRequest(null);
+                     navigate(`/requests/${selectedRequest.id}`);
+                   }}
+                   className="px-3 py-2 text-sm font-medium text-slate-600 hover:text-uii-blue hover:bg-blue-50 border border-slate-200 rounded-lg transition-all flex items-center gap-2"
+                 >
+                   <ExternalLink size={16} />
+                   <span className="hidden sm:inline">Halaman Detail</span>
+                 </button>
               </div>
 
               {/* Tombol Standar Kanan */}
               <div className="flex gap-3 w-full sm:w-auto justify-end">
-                <button 
+                <button
                   onClick={() => setSelectedRequest(null)}
                   className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-slate-600 hover:bg-white hover:text-slate-800 border border-transparent hover:border-gray-200 rounded-lg transition-all"
                 >
