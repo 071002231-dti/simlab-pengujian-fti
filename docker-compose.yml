@@ -7,8 +7,9 @@ services:
     ports:
       - "3000:80"
     environment:
-      - API_BASE_URL=/api
-      - USE_MOCK_DATA=false
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+      - VITE_USE_MOCK_DATA=false
+      - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     depends_on:
       - backend
     networks:
@@ -28,6 +29,7 @@ services:
       - APP_KEY=${APP_KEY}
       - APP_DEBUG=false
       - APP_URL=http://localhost:8000
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - DB_CONNECTION=mysql
       - DB_HOST=mysql
       - DB_PORT=3306
@@ -35,6 +37,9 @@ services:
       - DB_USERNAME=simlab
       - DB_PASSWORD=${DB_PASSWORD:-simlab123}
       - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-http://localhost:8000/api/auth/google/callback}
     depends_on:
       mysql:
         condition: service_healthy

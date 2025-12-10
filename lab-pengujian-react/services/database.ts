@@ -159,14 +159,14 @@ export const AuthService = {
     }
   },
 
-  // Login Google (Customer)
+  // Login Google (Customer) - Legacy method for mock data
   loginGoogle: async (): Promise<User> => {
     if (USE_MOCK_DATA) {
       // MOCK MODE
       return new Promise((resolve) => {
         setTimeout(() => {
           const googleUser: User = {
-            id: 999, // Fixed ID untuk Demo Customer agar cocok dengan constants.ts
+            id: 999,
             name: 'Budi Santoso',
             email: 'budi.santoso@gmail.com',
             role: UserRole.CUSTOMER,
@@ -177,8 +177,89 @@ export const AuthService = {
         }, 1500);
       });
     } else {
-      throw new Error("Google Auth via API belum dikonfigurasi.");
+      throw new Error("Use loginWithGoogleToken instead.");
     }
+  },
+
+  // Login with Google Token (from Google Identity Services)
+  loginWithGoogleToken: async (credential: string): Promise<User> => {
+    if (USE_MOCK_DATA) {
+      // MOCK MODE - decode JWT and find user
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            const parts = credential.split('.');
+            if (parts.length === 3) {
+              const payload = JSON.parse(atob(parts[1]));
+              const user = SEED_USERS.find(u => u.email === payload.email);
+              if (user) {
+                const { password, ...userData } = user;
+                resolve({ ...userData, avatar: payload.picture } as User);
+              } else {
+                reject(new Error('Akun tidak terdaftar dalam sistem.'));
+              }
+            } else {
+              reject(new Error('Invalid token format'));
+            }
+          } catch {
+            reject(new Error('Failed to parse token'));
+          }
+        }, 800);
+      });
+    } else {
+      // REAL API MODE
+      const response = await apiCall('/auth/google/token', 'POST', { credential });
+      if (!response.success) {
+        throw new Error(response.message || 'Login gagal');
+      }
+      // Simpan token di localStorage
+      localStorage.setItem('auth_token', response.token);
+      return {
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role,
+        labId: response.user.lab_id,
+        labName: response.user.lab?.name,
+        avatar: response.user.avatar,
+      } as User;
+    }
+  },
+
+  // Get current user from token
+  getCurrentUser: async (): Promise<User> => {
+    const authToken = localStorage.getItem('auth_token');
+    if (!authToken) {
+      throw new Error('No auth token');
+    }
+
+    if (USE_MOCK_DATA) {
+      throw new Error('Not implemented for mock mode');
+    }
+
+    const response = await apiCall('/me', 'GET', null, authToken);
+    return {
+      id: response.id,
+      name: response.name,
+      email: response.email,
+      role: response.role,
+      labId: response.lab_id,
+      labName: response.lab?.name,
+      avatar: response.avatar,
+    } as User;
+  },
+
+  // Logout
+  logout: async (): Promise<void> => {
+    const authToken = localStorage.getItem('auth_token');
+    if (authToken && !USE_MOCK_DATA) {
+      try {
+        await apiCall('/logout', 'POST', null, authToken);
+      } catch {
+        // Ignore logout errors
+      }
+    }
+    localStorage.removeItem('auth_token');
   },
 
   // Helper untuk mendapatkan Email Customer (Simulasi Database Lookup)
@@ -186,7 +267,7 @@ export const AuthService = {
     // Cek di SEED_USERS
     const user = SEED_USERS.find(u => u.id === userId);
     if (user) return user.email;
-    
+
     // Cek jika user demo (Budi)
     if (userId === 999) return 'budi.santoso@gmail.com';
 

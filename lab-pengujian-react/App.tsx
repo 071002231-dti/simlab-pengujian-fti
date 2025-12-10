@@ -8,6 +8,8 @@ import { RequestList } from './pages/RequestList';
 import { RequestDetail } from './pages/RequestDetail';
 import { ProcedureTemplates } from './pages/admin/ProcedureTemplates';
 import { Login } from './pages/Login';
+import { AuthCallback } from './pages/AuthCallback';
+import { AuthService } from './services/database';
 import { UserRole, User } from './types';
 import { Bell, Check, Info, AlertTriangle, Menu } from 'lucide-react';
 import { LABS } from './constants';
@@ -106,13 +108,23 @@ const App: React.FC = () => {
     // In a real app, you would store the auth token in localStorage here
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await AuthService.logout();
     setUser(null);
     setIsSidebarOpen(false);
   };
 
+  // Check for auth callback or login routes
   if (!user) {
-    return <Login onLogin={handleLogin} />;
+    return (
+      <Router>
+        <Routes>
+          <Route path="/auth/callback" element={<AuthCallback onLogin={handleLogin} />} />
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="*" element={<Login onLogin={handleLogin} />} />
+        </Routes>
+      </Router>
+    );
   }
 
   // FILTER NOTIFICATIONS BASED ON ROLE & LAB ID

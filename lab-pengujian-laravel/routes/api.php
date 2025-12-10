@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\LabController;
 use App\Http\Controllers\Api\ProcedureTemplateController;
 use App\Http\Controllers\Api\RequestProcedureController;
@@ -11,6 +12,11 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
+
+// Google OAuth routes
+Route::get('/auth/google', [GoogleAuthController::class, 'redirect']);
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
+Route::post('/auth/google/token', [GoogleAuthController::class, 'handleToken']);
 Route::get('/labs', [LabController::class, 'index']);
 Route::get('/labs/{id}', [LabController::class, 'show']);
 Route::get('/labs/{id}/test-types', [TestTypeController::class, 'byLab']);
