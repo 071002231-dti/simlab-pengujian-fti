@@ -25,7 +25,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->index(['request_procedure_id', 'approval_type', 'status']);
+            $table->index(['request_procedure_id', 'approval_type', 'status'], 'proc_approvals_req_type_status_idx');
         });
     }
 
