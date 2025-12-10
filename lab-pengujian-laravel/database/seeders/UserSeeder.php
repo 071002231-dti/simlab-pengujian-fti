@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         // Admin
         User::create([
             'name' => 'Administrator',
-            'email' => 'admin@uii.ac.id',
+            'email' => '071002231@uii.ac.id',
             'password' => Hash::make('admin'),
             'role' => 'admin',
             'lab_id' => null,
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
         // Laboran
         User::create([
             'name' => 'Laboran Tekstil',
-            'email' => 'laboran.tekstil@uii.ac.id',
+            'email' => '111002203@uii.ac.id',
             'password' => Hash::make('123'),
             'role' => 'laboran',
             'lab_id' => $tekstilLab->id,
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
 
         User::create([
             'name' => 'Laboran Kimia',
-            'email' => 'laboran.kimia@uii.ac.id',
+            'email' => '191002101@uii.ac.id',
             'password' => Hash::make('123'),
             'role' => 'laboran',
             'lab_id' => $kimiaLab->id,
@@ -46,7 +46,7 @@ class UserSeeder extends Seeder
 
         User::create([
             'name' => 'Laboran Forensik',
-            'email' => 'laboran.forensik@uii.ac.id',
+            'email' => 'crimeleavestrace@gmail.com',
             'password' => Hash::make('123'),
             'role' => 'laboran',
             'lab_id' => $forensikLab->id,
