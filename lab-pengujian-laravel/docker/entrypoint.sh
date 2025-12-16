@@ -3,11 +3,9 @@ set -e
 
 # Create .env file if it doesn't exist
 if [ ! -f /var/www/html/.env ]; then
-    echo "Creating .env file..."
+    echo "Creating .env file from .env.example..."
     cp /var/www/html/.env.example /var/www/html/.env
-
-    # Generate APP_KEY
-    php artisan key:generate --force
+    echo ".env file created successfully"
 fi
 
 # Update .env with environment variables if they exist
