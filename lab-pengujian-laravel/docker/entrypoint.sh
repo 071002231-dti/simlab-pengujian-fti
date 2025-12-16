@@ -9,9 +9,7 @@ if [ ! -f /var/www/html/.env ]; then
 fi
 
 # Update .env with environment variables if they exist
-if [ -n "$APP_KEY" ]; then
-    sed -i "s|APP_KEY=.*|APP_KEY=$APP_KEY|" /var/www/html/.env
-fi
+# Note: APP_KEY is already set in .env.example, don't override
 if [ -n "$DB_HOST" ]; then
     sed -i "s|DB_HOST=.*|DB_HOST=$DB_HOST|" /var/www/html/.env
 fi
