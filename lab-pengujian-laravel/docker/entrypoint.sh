@@ -45,7 +45,7 @@ fi
 
 # Wait for database to be ready
 echo "Waiting for database..."
-while ! mysqladmin ping -h"$DB_HOST" -u"$DB_USERNAME" -p"$DB_PASSWORD" --silent 2>/dev/null; do
+while ! mysqladmin ping -h"$DB_HOST" -u"$DB_USERNAME" -p"$DB_PASSWORD" --skip-ssl --silent 2>/dev/null; do
     sleep 1
 done
 echo "Database is ready!"
