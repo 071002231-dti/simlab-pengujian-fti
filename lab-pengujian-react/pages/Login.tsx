@@ -104,8 +104,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   // Fallback Google login using popup/redirect
   const handleGoogleLoginFallback = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || '';
-    window.location.href = `${apiUrl}/api/auth/google`;
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    // Remove trailing /api if present, then add /api/auth/google
+    const baseUrl = apiBaseUrl.replace(/\/api\/?$/, '');
+    window.location.href = `${baseUrl}/api/auth/google`;
   };
 
   return (
