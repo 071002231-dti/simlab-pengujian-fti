@@ -3,12 +3,15 @@ services:
     build:
       context: ./lab-pengujian-react
       dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://portal.fit.uii.ac.id/simlab/api}
+        - VITE_BASE_PATH=${VITE_BASE_PATH:-/simlab/}
+        - VITE_USE_MOCK_DATA=false
     container_name: simlab-frontend
     ports:
       - "3000:80"
     environment:
-      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
-      - VITE_USE_MOCK_DATA=false
+      - API_BASE_URL=${VITE_API_BASE_URL:-https://portal.fit.uii.ac.id/simlab/api}
       - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     depends_on:
       - backend
@@ -27,18 +30,18 @@ services:
       - APP_NAME=SimLab
       - APP_ENV=production
       - APP_DEBUG=false
-      - APP_URL=http://localhost:8000
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - APP_URL=${APP_URL:-https://portal.fit.uii.ac.id/simlab}
+      - FRONTEND_URL=${FRONTEND_URL:-https://portal.fit.uii.ac.id/simlab}
       - DB_CONNECTION=mysql
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_DATABASE=simlab
       - DB_USERNAME=simlab
       - DB_PASSWORD=${DB_PASSWORD:-simlab123}
-      - SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000
+      - SANCTUM_STATEFUL_DOMAINS=${SANCTUM_STATEFUL_DOMAINS:-portal.fit.uii.ac.id,localhost,localhost:3000}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-http://localhost:8000/api/auth/google/callback}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-https://portal.fit.uii.ac.id/simlab/api/auth/google/callback}
     depends_on:
       mysql:
         condition: service_healthy

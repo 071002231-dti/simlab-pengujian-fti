@@ -17,9 +17,11 @@ COPY . .
 # Build arguments for Vite (build-time defaults)
 ARG VITE_API_BASE_URL=http://localhost:8000/api
 ARG VITE_USE_MOCK_DATA=false
+ARG VITE_BASE_PATH=/
 
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_USE_MOCK_DATA=$VITE_USE_MOCK_DATA
+ENV VITE_BASE_PATH=$VITE_BASE_PATH
 
 # Build the application
 RUN npm run build
