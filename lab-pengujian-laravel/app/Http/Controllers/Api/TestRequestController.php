@@ -45,27 +45,61 @@ class TestRequestController extends Controller
     {
         $validated = $request->validate([
             'lab_id' => 'required|exists:labs,id',
-            'lab_name' => 'required|string',
-            'test_type' => 'required|string',
+            'test_type_id' => 'nullable|exists:test_types,id',
+            // Enhanced form fields
+            'company_name' => 'nullable|string',
+            'phone_whatsapp' => 'nullable|string',
+            'address' => 'nullable|string',
             'sample_name' => 'nullable|string',
+            'sample_quantity' => 'nullable|integer',
+            'sample_packaging' => 'nullable|string',
             'description' => 'nullable|string',
-            'expiry_date' => 'nullable|date',
+            'estimated_delivery_date' => 'nullable|date',
+            'priority' => 'nullable|string',
+            'special_notes' => 'nullable|string',
+            'delivery_method' => 'nullable|string',
+            'special_handling' => 'nullable|array',
+            'sample_return' => 'nullable|string',
+            'tujuan_pengujian' => 'nullable|array',
+            'data_accuracy_confirmed' => 'nullable|boolean',
+            'tat_cost_understood' => 'nullable|boolean',
         ]);
 
         $user = $request->user();
 
+        // Get lab and test type names
+        $lab = \App\Models\Lab::find($validated['lab_id']);
+        $testType = isset($validated['test_type_id'])
+            ? \App\Models\TestType::find($validated['test_type_id'])
+            : null;
+
         $testRequest = TestRequest::create([
             'id' => TestRequest::generateId(),
             'user_id' => $user->id,
-            'customer_name' => $user->name,
+            'customer_name' => $validated['company_name'] ?? $user->name,
             'lab_id' => $validated['lab_id'],
-            'lab_name' => $validated['lab_name'],
-            'test_type' => $validated['test_type'],
+            'lab_name' => $lab->name,
+            'test_type' => $testType?->name ?? 'Pengujian Umum',
+            'test_type_id' => $validated['test_type_id'] ?? null,
             'date_submitted' => now(),
             'status' => TestRequest::STATUS_PENDING,
             'sample_name' => $validated['sample_name'] ?? null,
             'description' => $validated['description'] ?? null,
-            'expiry_date' => $validated['expiry_date'] ?? null,
+            // Enhanced fields
+            'company_name' => $validated['company_name'] ?? null,
+            'phone_whatsapp' => $validated['phone_whatsapp'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'sample_quantity' => $validated['sample_quantity'] ?? null,
+            'sample_packaging' => $validated['sample_packaging'] ?? null,
+            'estimated_delivery_date' => $validated['estimated_delivery_date'] ?? null,
+            'priority' => $validated['priority'] ?? 'regular',
+            'special_notes' => $validated['special_notes'] ?? null,
+            'delivery_method' => $validated['delivery_method'] ?? null,
+            'special_handling' => $validated['special_handling'] ?? null,
+            'sample_return' => $validated['sample_return'] ?? null,
+            'tujuan_pengujian' => $validated['tujuan_pengujian'] ?? null,
+            'data_accuracy_confirmed' => $validated['data_accuracy_confirmed'] ?? false,
+            'tat_cost_understood' => $validated['tat_cost_understood'] ?? false,
         ]);
 
         return response()->json([
