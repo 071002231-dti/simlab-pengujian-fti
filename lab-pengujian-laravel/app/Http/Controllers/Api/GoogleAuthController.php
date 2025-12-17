@@ -34,24 +34,21 @@ class GoogleAuthController extends Controller
                 ->first();
 
             if (!$user) {
-                // User not found - return error (only pre-registered users can login)
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Akun tidak terdaftar dalam sistem. Hubungi administrator.',
-                ], 403);
-            }
-
-            // Update google_id if not set
-            if (!$user->google_id) {
+                // Auto-register as customer for new users
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'avatar' => $googleUser->getAvatar(),
+                    'role' => 'customer',
+                    'password' => bcrypt(str()->random(32)),
+                ]);
+            } else {
+                // Update google_id and avatar if needed
                 $user->update([
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
                 ]);
-            }
-
-            // Update avatar if changed
-            if ($user->avatar !== $googleUser->getAvatar()) {
-                $user->update(['avatar' => $googleUser->getAvatar()]);
             }
 
             // Create Sanctum token
@@ -109,17 +106,22 @@ class GoogleAuthController extends Controller
                 ->first();
 
             if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Akun tidak terdaftar dalam sistem. Hubungi administrator.',
-                ], 403);
+                // Auto-register as customer for new users
+                $user = User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'google_id' => $googleId,
+                    'avatar' => $avatar,
+                    'role' => 'customer',
+                    'password' => bcrypt(str()->random(32)), // Random password (won't be used)
+                ]);
+            } else {
+                // Update google_id and avatar if needed
+                $user->update([
+                    'google_id' => $googleId,
+                    'avatar' => $avatar,
+                ]);
             }
-
-            // Update google_id and avatar if needed
-            $user->update([
-                'google_id' => $googleId,
-                'avatar' => $avatar,
-            ]);
 
             // Create Sanctum token
             $token = $user->createToken('auth-token')->plainTextToken;
