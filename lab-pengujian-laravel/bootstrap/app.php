@@ -14,11 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
 
-        // Exclude Google OAuth routes from CSRF verification
+        // Exclude API routes from CSRF verification (using token-based auth)
         $middleware->validateCsrfTokens(except: [
-            'api/auth/google',
-            'api/auth/google/*',
-            'api/login',
+            'api/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
