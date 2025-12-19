@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\LabController;
 use App\Http\Controllers\Api\ProcedureTemplateController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\RequestProcedureController;
 use App\Http\Controllers\Api\TestRequestController;
 use App\Http\Controllers\Api\TestTypeController;
@@ -36,6 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/requests', [TestRequestController::class, 'store']);
     Route::get('/requests/{id}', [TestRequestController::class, 'show']);
     Route::put('/requests/{id}/status', [TestRequestController::class, 'updateStatus']);
+    Route::get('/requests/{id}/report-pdf', [ReportController::class, 'generateReportPdf']);
+
+    // Reports & Export
+    Route::post('/reports/export-pdf', [ReportController::class, 'exportPdf']);
 
     // Request Procedures
     Route::get('/requests/{id}/procedure', [RequestProcedureController::class, 'show']);

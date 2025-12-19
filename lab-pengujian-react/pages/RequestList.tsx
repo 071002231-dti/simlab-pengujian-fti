@@ -6,6 +6,7 @@ import { DataService, AuthService } from '../services/database';
 import { StatusBadge } from '../components/StatusBadge';
 import { RequestStatus, User, UserRole, TestRequest } from '../types';
 import { Search, Filter, Download, FileSpreadsheet, FileText, ChevronDown, X, Eye, Calendar, FlaskConical, Loader2, CheckCircle, Play, Send, PackageCheck, ShieldCheck, Lock, ExternalLink } from 'lucide-react';
+import { exportToExcel, exportToPdf, downloadReportPdf } from '../utils/exportUtils';
 
 interface RequestListProps {
   user: User;
@@ -64,22 +65,40 @@ export const RequestList: React.FC<RequestListProps> = ({ user }) => {
     };
   }, [exportDropdownRef, filterDropdownRef]);
 
-  const handleExport = (type: 'excel' | 'pdf') => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async (type: 'excel' | 'pdf') => {
     setIsExportOpen(false);
-    alert(`Sedang memproses unduhan file ${type.toUpperCase()} untuk ${filteredRequests.length} data...`);
+    setIsExporting(true);
+
+    try {
+      if (type === 'excel') {
+        const filename = exportToExcel(filteredRequests);
+        alert(`File ${filename} berhasil diunduh!`);
+      } else {
+        const filename = await exportToPdf(filteredRequests);
+        alert(`File ${filename} berhasil diunduh!`);
+      }
+    } catch (error: any) {
+      alert(`Gagal mengunduh file: ${error.message}`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // --- Handle Download PDF Single ---
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!selectedRequest) return;
     setIsDownloading(true);
 
-    // Simulasi delay network/generate PDF
-    setTimeout(() => {
+    try {
+      const filename = await downloadReportPdf(selectedRequest.id);
+      alert(`File ${filename} berhasil diunduh!`);
+    } catch (error: any) {
+      alert(`Gagal mengunduh laporan: ${error.message}`);
+    } finally {
       setIsDownloading(false);
-      // Di real app, ini akan mentrigger window.open(url) atau membuat blob link
-      alert(`File Laporan_Hasil_Uji_${selectedRequest.id}.pdf berhasil diunduh ke perangkat Anda.`);
-    }, 1500);
+    }
   };
 
   // --- Handle Update Status ---
@@ -319,13 +338,14 @@ export const RequestList: React.FC<RequestListProps> = ({ user }) => {
             
             {/* Export Dropdown */}
             <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
-              <button 
+              <button
                 onClick={() => setIsExportOpen(!isExportOpen)}
-                className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-uii-blue text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm ${isExportOpen ? 'ring-2 ring-blue-300' : ''}`}
+                disabled={isExporting}
+                className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-uii-blue text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed ${isExportOpen ? 'ring-2 ring-blue-300' : ''}`}
               >
-                <Download size={18} />
-                Export
-                <ChevronDown size={16} className={`transition-transform duration-200 ${isExportOpen ? 'rotate-180' : ''}`} />
+                {isExporting ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                {isExporting ? 'Memproses...' : 'Export'}
+                {!isExporting && <ChevronDown size={16} className={`transition-transform duration-200 ${isExportOpen ? 'rotate-180' : ''}`} />}
               </button>
 
               {isExportOpen && (
