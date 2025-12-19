@@ -10,7 +10,6 @@ const STATUS_LABELS: Record<RequestStatus, string> = {
   [RequestStatus.IN_PROGRESS]: 'Sedang Diuji',
   [RequestStatus.COMPLETED]: 'Selesai Uji',
   [RequestStatus.DELIVERED]: 'Hasil Terkirim',
-  [RequestStatus.REJECTED]: 'Ditolak',
 };
 
 /**
