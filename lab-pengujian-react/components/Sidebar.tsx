@@ -1,17 +1,17 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, List, Settings, LogOut, FlaskConical, X, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, List, Settings, FlaskConical, X, ClipboardList } from 'lucide-react';
 import { UserRole } from '../types';
 
 interface SidebarProps {
   userRole: UserRole;
-  onLogout: () => void;
+  onLogout?: () => void; // Optional, tidak digunakan lagi di sidebar
   isOpen: boolean; // Prop untuk status mobile
   onClose: () => void; // Fungsi tutup untuk mobile
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ userRole, onLogout, isOpen, onClose }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ userRole, isOpen, onClose }) => {
   const location = useLocation();
 
   const isActive = (path: string) => {
@@ -91,15 +91,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ userRole, onLogout, isOpen, on
         )}
       </nav>
 
-      {/* Footer Sidebar */}
+      {/* Footer Sidebar - Version Info */}
       <div className="p-4 border-t border-gray-100">
-        <button 
-          onClick={onLogout}
-          className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-        >
-          <LogOut size={18} />
-          Keluar
-        </button>
+        <div className="text-center text-xs text-slate-400">
+          <p>SimLab FTI UII</p>
+          <p>v1.0.0</p>
+        </div>
       </div>
     </aside>
   );

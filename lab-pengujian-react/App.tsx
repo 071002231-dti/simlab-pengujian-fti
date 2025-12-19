@@ -11,7 +11,7 @@ import { Login } from './pages/Login';
 import { AuthCallback } from './pages/AuthCallback';
 import { AuthService } from './services/database';
 import { UserRole, User } from './types';
-import { Bell, Check, Info, AlertTriangle, Menu } from 'lucide-react';
+import { Bell, Check, Info, AlertTriangle, Menu, LogOut, ChevronDown } from 'lucide-react';
 import { LABS } from './constants';
 
 // Mock Data Notifikasi (Updated with userId and labId)
@@ -81,21 +81,26 @@ const MOCK_NOTIFICATIONS = [
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State untuk Mobile Sidebar
   const notifRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Handle click outside notification
+  // Handle click outside notification and user menu
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setIsNotifOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [notifRef]);
+  }, [notifRef, userMenuRef]);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -248,20 +253,52 @@ const App: React.FC = () => {
                 )}
               </div>
 
-              {/* User Profile */}
-              <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-                <div className="text-right hidden md:block">
-                  <p className="text-sm font-bold text-slate-800">{user.name}</p>
-                  <p className="text-xs text-slate-500 capitalize">
-                     {user.role.replace('_', ' ')} 
-                     {user.labId && ` - ${LABS.find(l => l.id === user.labId)?.code}`}
-                  </p>
-                </div>
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="w-9 h-9 md:w-10 md:h-10 rounded-full border border-gray-200 shadow-md object-cover" />
-                ) : (
-                  <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold shadow-md text-sm md:text-base">
-                    {user.name.charAt(0)}
+              {/* User Profile with Dropdown */}
+              <div className="relative pl-4 border-l border-gray-200" ref={userMenuRef}>
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className={`flex items-center gap-3 p-1.5 rounded-lg transition-colors ${isUserMenuOpen ? 'bg-slate-100' : 'hover:bg-slate-50'}`}
+                >
+                  <div className="text-right hidden md:block">
+                    <p className="text-sm font-bold text-slate-800">{user.name}</p>
+                    <p className="text-xs text-slate-500 capitalize">
+                       {user.role.replace('_', ' ')}
+                       {user.labId && ` - ${LABS.find(l => l.id === user.labId)?.code}`}
+                    </p>
+                  </div>
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="w-9 h-9 md:w-10 md:h-10 rounded-full border border-gray-200 shadow-md object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold shadow-md text-sm md:text-base">
+                      {user.name.charAt(0)}
+                    </div>
+                  )}
+                  <ChevronDown size={16} className={`text-slate-400 hidden md:block transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* User Dropdown Menu */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right z-50">
+                    {/* User Info (Mobile) */}
+                    <div className="px-4 py-3 border-b border-gray-100 md:hidden">
+                      <p className="font-semibold text-slate-800">{user.name}</p>
+                      <p className="text-xs text-slate-500 capitalize">
+                        {user.role.replace('_', ' ')}
+                        {user.labId && ` - ${LABS.find(l => l.id === user.labId)?.code}`}
+                      </p>
+                    </div>
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors text-left"
+                      >
+                        <LogOut size={18} />
+                        Keluar
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
