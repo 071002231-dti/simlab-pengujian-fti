@@ -5,7 +5,7 @@ import { LABS } from '../constants';
 import { DataService, AuthService } from '../services/database';
 import { StatusBadge } from '../components/StatusBadge';
 import { RequestStatus, User, UserRole, TestRequest } from '../types';
-import { Search, Filter, Download, FileSpreadsheet, FileText, ChevronDown, X, Eye, Calendar, FlaskConical, Loader2, CheckCircle, Play, Send, PackageCheck, ShieldCheck, Lock, ExternalLink } from 'lucide-react';
+import { Search, Filter, Download, FileSpreadsheet, FileText, ChevronDown, X, Eye, Calendar, FlaskConical, Loader2, CheckCircle, Play, Send, PackageCheck, ShieldCheck, Lock, ExternalLink, Edit } from 'lucide-react';
 import { exportToExcel, exportToPdf, downloadReportPdf } from '../utils/exportUtils';
 
 interface RequestListProps {
@@ -26,6 +26,11 @@ export const RequestList: React.FC<RequestListProps> = ({ user }) => {
   const [selectedRequest, setSelectedRequest] = useState<TestRequest | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false); // State untuk download PDF
+
+  // Edit Modal State
+  const [editingRequest, setEditingRequest] = useState<TestRequest | null>(null);
+  const [editFormData, setEditFormData] = useState({ sampleName: '', description: '' });
+  const [isEditing, setIsEditing] = useState(false);
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,6 +103,42 @@ export const RequestList: React.FC<RequestListProps> = ({ user }) => {
       alert(`Gagal mengunduh laporan: ${error.message}`);
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  // --- Handle Edit Request ---
+  const handleOpenEdit = (request: TestRequest) => {
+    setEditingRequest(request);
+    setEditFormData({
+      sampleName: request.sampleName || '',
+      description: request.description || '',
+    });
+    setSelectedRequest(null); // Close detail modal
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRequest) return;
+    setIsEditing(true);
+
+    try {
+      await DataService.updateRequest(editingRequest.id, {
+        sampleName: editFormData.sampleName,
+        description: editFormData.description,
+      });
+
+      // Update local state
+      const updatedRequest = {
+        ...editingRequest,
+        sampleName: editFormData.sampleName,
+        description: editFormData.description,
+      };
+      setRequests(prev => prev.map(r => r.id === editingRequest.id ? updatedRequest : r));
+      setEditingRequest(null);
+      alert('Permintaan berhasil diperbarui!');
+    } catch (error: any) {
+      alert(`Gagal memperbarui: ${error.message}`);
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -541,6 +582,19 @@ export const RequestList: React.FC<RequestListProps> = ({ user }) => {
               {/* Action Buttons Kiri (Untuk User Internal) */}
               <div className="w-full sm:w-auto flex gap-2">
                  {renderActionButtons()}
+
+                 {/* Tombol Edit untuk Customer dengan status PENDING */}
+                 {user.role === UserRole.CUSTOMER &&
+                  selectedRequest.status === RequestStatus.PENDING &&
+                  selectedRequest.userId === user.id && (
+                   <button
+                     onClick={() => handleOpenEdit(selectedRequest)}
+                     className="px-4 py-2 text-sm font-medium bg-amber-500 text-white rounded-lg hover:bg-amber-600 shadow-sm flex items-center gap-2"
+                   >
+                     <Edit size={16} /> Edit
+                   </button>
+                 )}
+
                  <button
                    onClick={() => {
                      setSelectedRequest(null);
@@ -579,6 +633,97 @@ export const RequestList: React.FC<RequestListProps> = ({ user }) => {
                   </button>
                 ) : null}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-slate-50">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Edit Permintaan</h3>
+                <p className="text-sm text-slate-500 font-mono">{editingRequest.id}</p>
+              </div>
+              <button
+                onClick={() => setEditingRequest(null)}
+                disabled={isEditing}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Lab Info (Read-only) */}
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-center gap-3">
+                <FlaskConical size={20} className="text-blue-600" />
+                <div>
+                  <p className="text-xs text-slate-500">Laboratorium</p>
+                  <p className="font-medium text-slate-800">{editingRequest.labName}</p>
+                </div>
+                <span className="ml-auto text-xs text-slate-400 bg-white px-2 py-1 rounded border">Tidak dapat diubah</span>
+              </div>
+
+              {/* Jenis Pengujian (Read-only) */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">Jenis Pengujian</label>
+                <input
+                  type="text"
+                  value={editingRequest.testType}
+                  disabled
+                  className="mt-1 w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Nama Sampel */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">Nama Sampel</label>
+                <input
+                  type="text"
+                  value={editFormData.sampleName}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, sampleName: e.target.value }))}
+                  disabled={isEditing}
+                  className="mt-1 w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  placeholder="Masukkan nama sampel..."
+                />
+              </div>
+
+              {/* Deskripsi */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">Deskripsi / Catatan</label>
+                <textarea
+                  value={editFormData.description}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                  disabled={isEditing}
+                  rows={4}
+                  className="mt-1 w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                  placeholder="Jelaskan kondisi sampel atau instruksi khusus..."
+                />
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-100 bg-slate-50 flex justify-end gap-3">
+              <button
+                onClick={() => setEditingRequest(null)}
+                disabled={isEditing}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-white border border-slate-200 rounded-lg transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={isEditing}
+                className="px-4 py-2 text-sm font-medium bg-uii-blue text-white rounded-lg hover:bg-blue-700 shadow-sm flex items-center gap-2 disabled:opacity-70"
+              >
+                {isEditing ? (
+                  <><Loader2 size={16} className="animate-spin" /> Menyimpan...</>
+                ) : (
+                  'Simpan Perubahan'
+                )}
+              </button>
             </div>
           </div>
         </div>

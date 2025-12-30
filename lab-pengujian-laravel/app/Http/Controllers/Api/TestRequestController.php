@@ -158,6 +158,63 @@ class TestRequestController extends Controller
         ]);
     }
 
+    public function update(Request $request, string $id)
+    {
+        $user = $request->user();
+        $testRequest = TestRequest::findOrFail($id);
+
+        // Authorization: Hanya pemilik (customer) yang bisa edit
+        if ($user->isCustomer() && $testRequest->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengedit permintaan ini',
+            ], 403);
+        }
+
+        // Business rule: Hanya status PENDING yang bisa diedit
+        if ($testRequest->status !== TestRequest::STATUS_PENDING) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya permintaan dengan status pending yang dapat diedit',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'test_type_id' => 'sometimes|exists:test_types,id',
+            'sample_name' => 'sometimes|string',
+            'description' => 'sometimes|string',
+            'sample_quantity' => 'sometimes|integer',
+            'sample_packaging' => 'sometimes|string',
+            'special_notes' => 'sometimes|string',
+            'priority' => 'sometimes|string',
+        ]);
+
+        // Update test_type name if test_type_id changed
+        if (isset($validated['test_type_id'])) {
+            $testType = \App\Models\TestType::find($validated['test_type_id']);
+            $validated['test_type'] = $testType?->name ?? $testRequest->test_type;
+        }
+
+        $testRequest->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permintaan berhasil diperbarui',
+            'data' => [
+                'id' => $testRequest->id,
+                'user_id' => $testRequest->user_id,
+                'customer_name' => $testRequest->customer_name,
+                'lab_id' => $testRequest->lab_id,
+                'lab_name' => $testRequest->lab_name,
+                'test_type' => $testRequest->test_type,
+                'date_submitted' => $testRequest->date_submitted->format('Y-m-d'),
+                'status' => $testRequest->status,
+                'sample_name' => $testRequest->sample_name,
+                'description' => $testRequest->description,
+            ],
+        ]);
+    }
+
     public function updateStatus(Request $request, string $id)
     {
         $validated = $request->validate([

@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/requests', [TestRequestController::class, 'index']);
     Route::post('/requests', [TestRequestController::class, 'store']);
     Route::get('/requests/{id}', [TestRequestController::class, 'show']);
+    Route::put('/requests/{id}', [TestRequestController::class, 'update']);
     Route::put('/requests/{id}/status', [TestRequestController::class, 'updateStatus']);
     Route::get('/requests/{id}/report-pdf', [ReportController::class, 'generateReportPdf']);
 

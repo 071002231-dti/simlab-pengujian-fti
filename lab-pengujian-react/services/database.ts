@@ -364,6 +364,49 @@ export const DataService = {
         status: response.data.status as RequestStatus,
       } as TestRequest;
     }
+  },
+
+  // Update Request Data (untuk edit sebelum diproses)
+  updateRequest: async (id: string, data: Partial<TestRequest>, token?: string): Promise<TestRequest> => {
+    if (USE_MOCK_DATA) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const index = currentRequests.findIndex(r => r.id === id);
+          if (index !== -1) {
+            currentRequests[index] = {
+              ...currentRequests[index],
+              testType: data.testType ?? currentRequests[index].testType,
+              sampleName: data.sampleName ?? currentRequests[index].sampleName,
+              description: data.description ?? currentRequests[index].description,
+            };
+            resolve(currentRequests[index]);
+          } else {
+            reject(new Error("Request tidak ditemukan"));
+          }
+        }, 600);
+      });
+    } else {
+      const authToken = token || localStorage.getItem('auth_token') || '';
+      // Convert camelCase to snake_case for API
+      const payload: any = {};
+      if (data.testType !== undefined) payload.test_type = data.testType;
+      if (data.sampleName !== undefined) payload.sample_name = data.sampleName;
+      if (data.description !== undefined) payload.description = data.description;
+
+      const response = await apiCall(`/requests/${id}`, 'PUT', payload, authToken);
+      return {
+        id: response.data.id,
+        userId: response.data.user_id,
+        customerName: response.data.customer_name,
+        labId: response.data.lab_id,
+        labName: response.data.lab_name,
+        testType: response.data.test_type,
+        dateSubmitted: response.data.date_submitted,
+        status: response.data.status as RequestStatus,
+        sampleName: response.data.sample_name,
+        description: response.data.description,
+      };
+    }
   }
 };
 
